@@ -13,12 +13,14 @@ public class main {
 	public static void main(String[] args) {
 
 		cargarAchivos();
-
+		
+		Scanner teclado = new Scanner(System.in);
 		int opcion = -1;
 
 		while (opcion != 6) {
-
-			mostrarMenu();
+			
+			String nombre = verificarNombre(teclado);
+			mostrarMenu(nombre);
 
 			switch (opcion) {
 
@@ -42,6 +44,42 @@ public class main {
 			}
 		}
 
+	}
+
+	private static String verificarNombre(Scanner teclado) {
+		
+		while (true) {
+			
+			System.out.println("Nombre de usuario: ");
+			
+			if (!teclado.hasNextLine()) {
+				
+				return null;
+				
+			}
+			
+			String nombre = teclado.nextLine().trim();
+			
+			if (nombre.isEmpty()); {
+				
+				System.out.println("[!] El nombre no puede estar vacío.");
+				
+			}
+			
+			if (nombre.contains(";")) {
+				
+				System.out.println("[!] El nombre no puede llevar ';'.");
+				
+			}
+			
+			else {
+				
+				return nombre;
+				
+			}
+			
+		}
+		
 	}
 
 	private static void terminarSesion() {
@@ -117,11 +155,26 @@ public class main {
 			System.out.println("Registros.txt empezara vacia");
 
 		}
+		
+		System.out.println("> " + monstruos.size() + " monstruos cargados desde Monstruos.txt");
+		System.out.println("> " + registros.size() + " jugadores cargados desde Registros.txt");
+		System.out.println("");
+		System.out.println("=========================================\r\n"
+				+ "             SPOOKY SEASON\r\n"
+				+ "=========================================");
 
 	}
 
-	private static void mostrarMenu() {
-		// TODO Auto-generated method stub
+	private static void mostrarMenu(String nombre) {
+		
+		System.out.println("------ MENÚ PRINCIPAL (" + nombre + ") ------");
+		System.out.println("1) Jugar un minijuego");
+		System.out.println("2) Ver catálogo de monstruos");
+		System.out.println("3) Ver historial de la sesión");
+		System.out.println("4) Ver ranking de jugadores");
+		System.out.println("5) Terminar sesión");
+		System.out.println("6) Salir");
+		System.out.println("> ");
 
 	}
 
