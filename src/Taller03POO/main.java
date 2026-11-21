@@ -1,6 +1,9 @@
+//Luis Lanas - 21.960.962-0 - ICCI
+
 package Taller03POO;
 
 import java.io.File;
+import java.util.LinkedList;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -42,8 +45,7 @@ public class main {
 
 			} else {
 
-				System.out.println(
-						"¡Bienvenido de vuelta, " + nombre + "! Tu récord actual es de " + record + " puntos.");
+				System.out.println("¡Bienvenido de vuelta, " + nombre + "! Tu récord actual es de " + record + " puntos.");
 				System.out.println("");
 
 			}
@@ -98,7 +100,6 @@ public class main {
 					break;
 				case 5:
 					terminarSesion();
-					System.out.println("");
 					break;
 				case 6:
 					break;
@@ -183,10 +184,30 @@ public class main {
 	}
 
 	private static void historialSesion() {
-		// TODO Auto-generated method stub
+		
+		LinkedList<ResultadoMinijuego> historial = sistema.getHistorial();
 
+	    System.out.println("------ HISTORIAL DE LA SESIÓN ------");
+
+	    if (historial.isEmpty()) {
+	    	
+	        System.out.println("[!] Todavía no has jugado ningún minijuego en esta sesión.");
+	        
+	    }
+
+	    for (ResultadoMinijuego resultado : historial) {
+	    	
+	        System.out.println(resultado.getMinijuego().getNombre()
+	                + " | Monstruo: " + resultado.getMonstruo().getTipo()
+	                + " | Habilidad: " + resultado.getHabilidad()
+	                + " | Puntaje: " + resultado.getPuntaje() + " puntos");
+	        
+	    }
+
+	    System.out.println("Puntaje acumulado: " + sistema.getPuntajeAcumulado() + " puntos");
+	    
 	}
-
+	
 	private static void catalogoMonstruos() {
 
 		ArrayList<Monstruo> catalogo = sistema.getMonstruos();
@@ -208,7 +229,6 @@ public class main {
 				}
 
 				textoHabilidades += habilidades.get(j);
-				
 			}
 
 			String estado = "Disponible";
@@ -226,8 +246,9 @@ public class main {
 	}
 
 	private static Monstruo elegirMonstruo(Scanner teclado, ArrayList<Monstruo> disponibles) {
-
-		System.out.println("\nElige el monstruo en el que te transformarás:");
+		
+		System.out.println("");
+		System.out.println("Elige el monstruo en el que te transformarás:");
 
 		for (int i = 0; i < disponibles.size(); i++) {
 
@@ -384,8 +405,9 @@ public class main {
 				return false;
 
 			}
-
-			System.out.println("\nTe comes un dulce de dudosa procedencia...");
+			
+			System.out.println("");
+			System.out.println("Te comes un dulce de dudosa procedencia...");
 			double potencial = sistema.calcularPotencial(minijuego, monstruo);
 			String potencialFormateado = String.format("%.2f", potencial).replace(',', '.');
 			System.out.println("Potencial para " + minijuego.getNombre() + ": " + potencialFormateado);
@@ -430,8 +452,9 @@ public class main {
 				}
 
 			}
-
-			System.out.println("\n>> Puntaje obtenido: " + resultado.getPuntaje() + " puntos");
+			
+			System.out.println("");
+			System.out.println(">> Puntaje obtenido: " + resultado.getPuntaje() + " puntos");
 			return true;
 
 		}
@@ -487,7 +510,8 @@ public class main {
 			"Muerde la mayor cantidad de calabazas del huerto en 60 segundos.",
 			"Lanza una lápida lo más lejos posible.", "Aguanta en pie cuando salgan los primeros rayos de sol." };
 
-	private static final String[] MINIJUEGOS = { "Carrera del Cementerio", "Caza de Calabazas",
+	private static final String[] MINIJUEGOS = { 
+			"Carrera del Cementerio", "Caza de Calabazas",
 			"Lanzamiento de Lápidas", "Sobrevivir al Amanecer" };
 
 	private static void cargarAchivos() {
