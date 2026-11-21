@@ -7,11 +7,12 @@ import java.util.LinkedList;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class main {
 
 	private static final Sistema sistema = new Sistema();
-	public static ArrayList<String> registros = new ArrayList<>();
 
 	public static void main(String[] args) {
 
@@ -36,7 +37,7 @@ public class main {
 
 			}
 
-			int record = buscarRecord(nombre);
+			int record = sistema.buscarRecord(nombre);
 
 			if (record == -1) {
 
@@ -99,41 +100,19 @@ public class main {
 					System.out.println("");
 					break;
 				case 5:
-					terminarSesion();
+					terminarSesion(nombre);
 					break;
 				case 6:
-					break;
+					terminarSesion(nombre);
+				    break;
+				default:
+				    System.out.println("[!] Ingresa un número del 1 al 6.");
+				    break;
 				}
 
 			}
 
 		}
-
-	}
-
-	private static int buscarRecord(String nombre) {
-
-		int record = -1;
-
-		for (String registro : registros) {
-
-			String[] datos = registro.split(";");
-
-			if (datos.length == 2 && datos[0].trim().equals(nombre)) {
-
-				try {
-
-					int puntaje = Integer.parseInt(datos[1].trim());
-
-				} catch (NumberFormatException e) {
-
-				}
-
-			}
-
-		}
-
-		return record;
 
 	}
 
@@ -157,7 +136,7 @@ public class main {
 
 			}
 
-			if (nombre.contains(";")) {
+			else if (nombre.contains(";")) {
 
 				System.out.println("El nombre no puede llevar ';'.");
 
@@ -167,27 +146,93 @@ public class main {
 
 				return nombre;
 
-			}
+			}	
 
 		}
 
 	}
 
-	private static void terminarSesion() {
-		// TODO Auto-generated method stub
+	private static void terminarSesion(String nombre) {
+		
+	    int puntajeTotal = sistema.getPuntajeAcumulado();
+	    int recordAnterior = sistema.buscarRecord(nombre);
 
+	    System.out.println("Sesión terminada. Puntaje total: " + puntajeTotal + " puntos.");
+
+	    if (sistema.actualizarRecordDeSesion(nombre)) {
+	    	
+	        if (recordAnterior == -1) {
+	        	
+	            System.out.println("Primer récord registrado: " + puntajeTotal + " puntos.");
+	            
+	        } else {
+	        	
+	            System.out.println("¡Felicitaciones! Superaste tu récord de " + recordAnterior + " puntos con " + puntajeTotal + " puntos.");
+	            
+	        }
+	        
+	    } else if (recordAnterior != -1 && !sistema.getHistorial().isEmpty()) {
+	    	
+	        System.out.println("No superaste tu récord (" + recordAnterior + "). ¡Suerte para la próxima!");
+	        
+	    }
+
+	    guardarRegistros();
+	    
+	}
+	
+	private static void guardarRegistros() {
+		
+	    try (FileWriter escritor = new FileWriter("Registros.txt")) {
+	    	
+	        for (Jugador jugador : sistema.getJugadores()) {
+	        	
+	            escritor.write(jugador.getNombre() + ";" + jugador.getPuntajeMaximo());
+	            escritor.write(System.lineSeparator());
+	            
+	        }
+	        
+	    } catch (IOException e) {
+	    	
+	        System.out.println("[!] No se pudo guardar Registros.txt.");
+	        return;
+	        
+	    }
+
+	    System.out.println("Registros guardados en Registros.txt.");
+	    
 	}
 
 	private static void rankingJugadores() {
-		// TODO Auto-generated method stub
+		
+	    ArrayList<Jugador> jugadores = sistema.getRanking();
 
+	    System.out.println("------ RANKING DE JUGADORES ------");
+
+	    if (jugadores.isEmpty()) {
+	    	
+	        System.out.println("[!] Todavía no hay jugadores registrados.");
+	        return;
+	        
+	    }
+
+	    for (int i = 0; i < jugadores.size(); i++) {
+	    	
+	        Jugador jugador = jugadores.get(i);
+
+	        String nombreAlineado = jugador.getNombre();
+	        
+	        System.out.println((i + 1) + ". " + nombreAlineado + " " + jugador.getPuntajeMaximo());
+	        
+	    }
+	    
 	}
 
 	private static void historialSesion() {
 		
 		LinkedList<ResultadoMinijuego> historial = sistema.getHistorial();
 
-	    System.out.println("------ HISTORIAL DE LA SESIÓN ------");
+		System.out.println("------ RANKING ------");
 
 	    if (historial.isEmpty()) {
 	    	
@@ -195,16 +240,16 @@ public class main {
 	        
 	    }
 
+	    int numero = 1;
+
 	    for (ResultadoMinijuego resultado : historial) {
 	    	
-	        System.out.println(resultado.getMinijuego().getNombre()
-	                + " | Monstruo: " + resultado.getMonstruo().getTipo()
-	                + " | Habilidad: " + resultado.getHabilidad()
-	                + " | Puntaje: " + resultado.getPuntaje() + " puntos");
+	        System.out.println(numero + ". " + resultado.getMinijuego().getNombre() + " | " + resultado.getMonstruo().getTipo() + " | Habilidad: " + resultado.getHabilidad() + " | " + resultado.getPuntaje() + " pts");
+	        numero++;
 	        
 	    }
 
-	    System.out.println("Puntaje acumulado: " + sistema.getPuntajeAcumulado() + " puntos");
+	    System.out.println("Puntaje acumulado: " + sistema.getPuntajeAcumulado() + " pts");
 	    
 	}
 	
@@ -421,18 +466,18 @@ public class main {
 
 			}
 
-			if (opcion == habilidades.size() + 1) {
-
-				continue;
-
+			if (opcion == 0) {
+				
+			    continue;
+			    
 			}
 
 			String habilidad = null;
-
-			if (opcion != 0) {
-
-				habilidad = habilidades.get(opcion - 1);
-
+			
+			if (opcion <= habilidades.size()) {
+				
+			    habilidad = habilidades.get(opcion - 1);
+			    
 			}
 
 			ResultadoMinijuego resultado = sistema.registrarPartida(minijuego, monstruo, habilidad);
@@ -471,9 +516,9 @@ public class main {
 
 		}
 
-		int opcionVolver = habilidades.size() + 1;
-		System.out.println("0) No usar habilidad");
-		System.out.println(opcionVolver + ") Volver");
+		int opcionSinHabilidad = habilidades.size() + 1;
+		System.out.println(opcionSinHabilidad + ") No usar habilidad");
+		System.out.println("0) Volver");
 
 		while (true) {
 
@@ -489,10 +534,10 @@ public class main {
 
 				int opcion = Integer.parseInt(teclado.nextLine().trim());
 
-				if (opcion >= 0 && opcion <= opcionVolver) {
-
-					return opcion;
-
+				if (opcion >= 0 && opcion <= opcionSinHabilidad) {
+					
+				    return opcion;
+				    
 				}
 
 			} catch (NumberFormatException e) {
@@ -561,26 +606,40 @@ public class main {
 
 		File archivosRegistros = new File("Registros.txt");
 
-		try {
+		try (Scanner lector = new Scanner(archivosRegistros)) {
+			
+		    int numeroLinea = 0;
 
-			Scanner lector = new Scanner(archivosRegistros);
+		    while (lector.hasNextLine()) {
+		    	
+		        numeroLinea++;
+		        String linea = lector.nextLine();
 
-			while (lector.hasNextLine()) {
+		        if (numeroLinea == 1 && linea.startsWith("\uFEFF")) {
+		            linea = linea.substring(1);
+		            
+		        }
 
-				registros.add(lector.nextLine());
-
-			}
-
-			lector.close();
-
+		        try {
+		        	
+		            sistema.agregarRegistro(linea.split(";"));
+		            
+		        } catch (IllegalArgumentException e) {
+		        	
+		            System.out.println("[!] Registros.txt, línea " + numeroLinea + ": " + e.getMessage());
+		            
+		        }
+		        
+		    }
+		    
 		} catch (FileNotFoundException e) {
-
-			System.out.println("Registros.txt empezara vacia");
-
+			
+		    System.out.println("No se pudo abrir Registros.txt. Se inicia con 0 jugadores registrados.");
+		    
 		}
 
 		System.out.println("> " + sistema.getCantidadMonstruos() + " monstruos cargados desde Monstruos.txt");
-		System.out.println("> " + registros.size() + " jugadores cargados desde Registros.txt");
+		System.out.println("> " + sistema.getCantidadJugadores() + " jugadores cargados desde Registros.txt");
 		System.out.println("");
 		System.out.println("=========================================\r\n" + "             SPOOKY SEASON\r\n"
 				+ "=========================================");

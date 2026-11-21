@@ -6,6 +6,7 @@ import java.util.LinkedList;
 public class Sistema {
 	
 	private final ArrayList<Monstruo> monstruos = new ArrayList<>();
+	private final ArrayList<Jugador> jugadores = new ArrayList<>();
 	private final LinkedList<ResultadoMinijuego> historial = new LinkedList<>();
 	private final Minijuego[] minijuegos = { new CarreraDelCementerio(), new CazaDeCalabazas(), new LanzamientoDeLapidas(), new SobrevivirAlAmanecer() };
 
@@ -83,6 +84,43 @@ public class Sistema {
 			
 		}
 		
+	}
+	
+	public ArrayList<Jugador> getJugadores() {
+	    return new ArrayList<>(jugadores);
+	}
+	
+	public ArrayList<Jugador> getRanking() {
+		
+	    ArrayList<Jugador> ranking = getJugadores();
+
+	    for (int i = 0; i < ranking.size() - 1; i++) {
+	    	
+	        for (int j = 0; j < ranking.size() - 1 - i; j++) {
+	        	
+	            Jugador actual = ranking.get(j);
+	            Jugador siguiente = ranking.get(j + 1);
+
+	            boolean menorPuntaje = actual.getPuntajeMaximo() < siguiente.getPuntajeMaximo();
+
+	            boolean empateDesordenado = actual.getPuntajeMaximo() == siguiente.getPuntajeMaximo() && actual.getNombre().compareToIgnoreCase(siguiente.getNombre()) > 0;
+
+	            if (menorPuntaje || empateDesordenado) {
+	            	
+	            	ranking.set(j, siguiente);
+	                ranking.set(j + 1, actual);
+	                
+	            }
+	            
+	        }
+	        
+	    }
+
+	    return ranking;
+	}
+	
+	public int getCantidadJugadores() {
+	    return jugadores.size();
 	}
 
 	public int getCantidadMonstruos() {
@@ -348,6 +386,96 @@ public class Sistema {
 		
 		return valor;
 		
+	}
+	
+	public void agregarRegistro(String[] datos) {
+		
+	    if (datos.length != 2) {
+	        throw new IllegalArgumentException("Se esperaba nombre;puntaje.");
+	        
+	    }
+
+	    String nombre = datos[0].trim();
+	    
+	    if (nombre.isEmpty()) {
+	    	
+	        throw new IllegalArgumentException("El nombre está vacío.");
+	        
+	    }
+
+	    int puntaje;
+	    
+	    try {
+	    	
+	        puntaje = Integer.parseInt(datos[1].trim());
+	        
+	    } catch (NumberFormatException e) {
+	    	
+	        throw new IllegalArgumentException("El puntaje debe ser un número entero.");
+	        
+	    }
+
+	    if (puntaje < 0) {
+	    	
+	        throw new IllegalArgumentException("El puntaje debe ser mayor o igual a cero.");
+	        
+	    }
+
+	    jugadores.add(new Jugador(nombre, puntaje));
+	    
+	}
+	
+	public int buscarRecord(String nombre) {
+		
+	    int record = -1;
+
+	    for (Jugador jugador : jugadores) {
+	    	
+	        if (jugador.getNombre().equals(nombre) && jugador.getPuntajeMaximo() > record) {
+	        	
+	            record = jugador.getPuntajeMaximo();
+	            
+	        }
+	        
+	    }
+
+	    return record;
+	    
+	}
+	
+	public boolean actualizarRecordDeSesion(String nombre) {
+		
+	    if (historial.isEmpty()) {
+	    	
+	        return false;
+	        
+	    }
+
+	    int puntaje = getPuntajeAcumulado();
+	    int recordAnterior = buscarRecord(nombre);
+
+	    if (puntaje <= recordAnterior) {
+	    	
+	        return false;
+	        
+	    }
+
+	    Jugador nuevoRegistro = new Jugador(nombre, puntaje);
+
+	    for (int i = 0; i < jugadores.size(); i++) {
+	    	
+	        if (jugadores.get(i).getNombre().equals(nombre)) {
+	        	
+	            jugadores.set(i, nuevoRegistro);
+	            return true;
+	            
+	        }
+	        
+	    }
+
+	    jugadores.add(nuevoRegistro);
+	    return true;
+	    
 	}
 	
 }
